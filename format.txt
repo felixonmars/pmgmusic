@@ -1,0 +1,144 @@
+VOS file format for VOS
+=======================
+
+All VOS-related data structures are in little-endian format.
+
+Strings are encoded as:
+
+struct string {
+  u8 len;
+  char val[len];
+};
+
+File structure:
+(from beyer85.vos)
+0x00: "\x03\x00\x00\x00"
+0x04: Segment table:
+
+struct seg {
+  u32 offset; /* Offset of the segment in the file */
+  char name[16]; /* "inf", "mid", "EOF" */
+} segs[variable]; /* The last segment is "EOF" */
+
+The "inf" segment:
+
+Before the inf_header, there can be an optional "VOS1" header:
+struct vos1_header {
+  char magic[4]; /* "VOS1" */
+  u16 version; /* Usually 1 */
+  char dummy[64]; /* Usually all zeros */
+  string str1;
+};
+
+struct inf_header {
+  string title; /* Song title */
+  string artist; /* Artist of the original song */
+  string comment; /* Unknown; in beyer** it is "Step xx" where xx is the difficulty level,
+                     but it can also be empty */
+  string vos_author; /* Author of the VOS */
+  u8 song_type; /* Probably things like "Classical" or "NewAge" */
+  u8 extended_type;
+  u32 length; /* The unit is approx. 1/974 sec (1024us?) */
+  u8 level; /* The shown level minus 1 */
+  char dummy[1023]; /* Seems to be zeroed out */
+};
+
+After the "inf" header, there is a list of note_arrays.  The last note array just collects
+the user-played notes in the other note arrays.
+
+struct note_array {
+  u32 type; /* Instrument? */
+  u32 nnote; /* Number of notes */
+  char dummy2[14]; /* Seems to be always zero */
+  note notes[nnote];
+}
+
+struct note {
+  u32 time;
+  u32 len; /* Length of the note */
+  u8 cmd, note_num, vol; /* The MIDI key-down command */
+  u16 mode; /* Bit 0-3: color (?); 4-6: corresponding key (do,re,mi,fa,so,la,ti);
+               Bit 7: set for notes played by the user;
+	       Bit 8: set for long notes. */
+  char unknown2[2]; /* what?  The first byte can be 0x80 or 0xB0 or 0xD0, ...  Is it the length? */
+};
+
+The "mid" segment:
+An ordinary MIDI file, but seems to contain initialization stuff only (please investigate further).
+
+
+VOS file format for CAN
+=======================
+0x00: "\x02\x00\x00\x00"
+What follows is a number of subfiles, terminated by EOF:
+
+struct subfile {
+  u32 name_len;
+  char name[name_len];
+  u32 len;
+  u8 data[len];
+}
+
+There are usually two subfiles: Vosctemp.trk and VOSCTEMP.mid.  The mid file is the same as the
+contents in the "mid" segment above.  The trk file format is described below.
+
+Strings in the trk file are encoded as:
+
+struct string2 {
+  u16 len;
+  char val[len];
+}
+
+The trk file format is as follows:
+
+struct vos022 {
+  char magic[4]; /* "VOS0" */
+  u16 version; /* "22" */
+  string2 title;
+  string2 artist;
+  string2 comment;
+  string2 vos_author;
+  string2 str;
+  u8 unknown1[11];
+  u32 length_tt; /* Length in tempo-based units */
+  u32 length; /* Length in real time, in the same units as above */
+  char dummy[1024]; /* The first six bytes are sometimes non-zero */
+  u32 narr; /* Number of note arrays */
+  u32 unknown4; /* Usually 1.  Number of user_arrays? */
+  struct {
+    u8 a; /* 0x04 */
+    u32 type;  /* Instrument */
+  } note_arr_info[narr];
+  u8 unknown6; /* zero */
+  u8 level;
+  string2 unknown7;
+  u32 unknown8; /* zero */
+  struct {
+    u32 nnote;
+    struct {
+      u8 xxx; /* zero */
+      u32 time;
+      u8 note_num;
+      u8 track;
+      u8 vol;
+      u8 is_user; /* boolean flags */
+      u8 xxx; /* one */
+      u8 is_long;
+      u32 len;
+      u8 xxx; /* usually 0xff when is_user is false and 0x00 otherwise; is_bgm?*/
+    } notes[nnote];
+  } note_arrs[narr];
+  u32 ? /* 0 */
+  u32 nunote;
+  struct {
+    u8 arr_idx;
+    u32 idx;
+    u8 key;
+  } unotes[nunote];
+  u32 ? /* 0; sometimes it is non-zero and I don't know then how to parse it */
+  u32 nlyric;
+  struct {
+    u32 time; /* in tt */
+    string2 lyric;
+  } lyrics[nlyric];
+}

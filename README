@@ -1,0 +1,58 @@
+默认的键位是zxcv,./，空格为暂停．若要修改，请改源程序中的
+on_main_area_key()函数，其中每个键所对应的GDK_xxx常数可在
+/usr/include/gtk-2.0/gdk/gdkkeysyms.h中查到．
+
+编译: make，如果出错，看看Makefile中PKGS后的几个包装了没有(注意-devel
+的rpm也要装)．
+
+运行: 先启动timidity (关于以下参数的意义，见本文末尾):
+  TIMIDITY_PCM_NAME=hw timidity -iA -Os -EFresamp=1 -EFreverb=1 -B2,8 -q0/0 -m2000
+它会显示Open sequencer port，确认端口号是128:0和128:1．
+然后执行./pmg xxxx.vos就可以玩了．
+
+除了vos文件名之外，还可加以下命令行参数(详见./pmg --help):
+
+-p CLIENT:PORT
+指定MIDI端口号，也就是timidity启动时在Open sequencer port后列出的一系
+列端口号(其中任何一个都可以)．默认为128:0．
+
+-s SPEED
+指定音符下落的速度(数值越大表示下落速度越快)．
+
+-d TIME
+指定dt0，它表示判定的严格程度，数值越小则判定越严格．
+
+-T TP
+将曲子的tempo乘上TP(类似于vostempo)．
+
+-o FNAME.pev
+将弹奏过程记录在FNAME.pev中，以后可用-i FNAME.pev重放．
+如果未指定该选项，则程序结束时会提示Autosave file name，弹奏过程会记录
+在这个文件中．
+
+-i FNAME.pev
+重放以前记录的弹奏过程．
+
+-f
+通常与-i合用，用来重新计算得分．
+
+-A
+自动演奏．
+
+例: ./pmg -s 1.5 -o contra-1.pev /dos/d/Vos1/Album/GameNAni/Contra.vos
+
+注意事项:
+1．程序运行时会在当前目录下寻找pmg.glade文件(pmg.c中的glade_fname)．
+2．音符下落的速度不会随Tempo而改变．
+3．按键后出现的圈为绿色表示按准了，蓝色表示按得太早，红色表示按得太晚．
+4．Rate表示最近2秒钟之内平均每秒的得分．
+5．计分规则: 短音按准了得1分，长音按、放各计1分、中间每秒计1分．按错的
+键(误差大于dt0秒)扣1分，每按住一秒再扣1分．连击不计分．
+6．在暂停时正在演奏的音会继续演奏下去，比较难听，以后会改正的．
+7．用-f计算出的得分与演奏后直接计算出的得分会有一些小的出入，这是因为
+*.pev文件中所记录的时间只准确到1ms．
+
+关于timidity的命令行参数：
+
+设置TIMIDITY_PCM_NAME=hw表示不使用软件混音器，这样可以降低延时，代价则
+是玩游戏的同时其它软件不能使用声卡。

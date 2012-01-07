@@ -1,0 +1,14 @@
+PMGMusic (or PMG in short) is a GNU/Linux clone of the well-known music games VOS/CANMusic originally produced by Hanseulsoft.  In these games, notes in a song are represented by falling bricks on the screen, with each note (do/re/mi/fa/so/la/ti) mapped to one key on the keyboard.  The player is expected to press the corresponding key at the instant a note reaches a line on the screen, at which time the note will be played.  All these notes, together with the background music, will form a complete song.  The player is scored according to the accuracy of the keypresses.  The songs are stored in MIDI-based *.vos files, and thousands of official and unofficial songs can be found online, ranging from beginners' songs to difficult ones requiring 25+ keypresses per second.
+
+The original VOS and CANMusic are closed-source Windows-only applications, and this GPL program provides a way to play the game under GNU/Linux.  Note that only the "game engine" is included; the songs (*.vos) files are to be obtained elsewhere, e.g. from an existing VOS/CANMusic installation.  Some annoyances (in the author's opinion) in the original games have been fixed, and some convenient features have been added.
+
+Current features:
+* Supports almost all *.vos files from VOS and CANMusic
+* Single-player only, and is fully playable
+* Basic graphics and sound (ALSA-compatible hardware or software synthesizer required, e.g. timidity)
+* A brand-new scoring algorithm
+* Recording and replaying demos
+* Automatic mode, for songs too hard to play yourself
+* Sound-only mode, if you just want to leisurely listen to the music
+* Speed of falling notes and song tempo adjustable on the command line
+* Optionally, the tempo can be adaptively adjusted according to how well you are playing

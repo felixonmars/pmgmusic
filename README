@@ -1,4 +1,4 @@
-默认的键位是zxcv,./，空格为暂停．若要修改，请改源程序中的
+默认的键位是sdf空格jkl，p为暂停．若要修改，请改源程序中的
 on_main_area_key()函数，其中每个键所对应的GDK_xxx常数可在
 /usr/include/gtk-2.0/gdk/gdkkeysyms.h中查到．
 
